@@ -189,11 +189,11 @@ Core functions in `drive-api.ts`:
 **Deliverable:** Empty app shell deployable to Vercel/Cloudflare Pages.
 
 ### Phase 1 — Google Cloud & Auth (Week 1)
-- [ ] Create GCP project; enable Google Drive API
-- [ ] Register OAuth 2.0 **Web application** client (SPA)
-- [ ] Whitelist `http://localhost:3000` and production origin
-- [ ] Implement GIS token client + Zustand auth store
-- [ ] Wire `login-drive` / `logout` commands
+- [x] Create GCP project; enable Google Drive API (documented in `docs/gcp-setup.md`)
+- [x] Register OAuth 2.0 **Web application** client (SPA)
+- [x] Whitelist `http://localhost:3000` and production origin
+- [x] Implement GIS token client + Zustand auth store
+- [x] Wire `login-drive` / `logout` commands (plus `whoami`, `help`; minimal xterm.js pulled forward)
 
 **Deliverable:** User can authenticate; token held in memory; `whoami` works.
 

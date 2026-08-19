@@ -8,13 +8,15 @@ Users interact through a familiar shell (`ls`, `cat`, `nano`, `upload`, `downloa
 
 | Phase | Scope | Status |
 |-------|-------|--------|
-| **0** | Next.js scaffold, Tailwind, shadcn/ui, env config | In progress |
-| 1 | Google OAuth + Drive auth | Planned |
-| 2 | xterm.js terminal + command parser | Planned |
+| 0 | Next.js scaffold, Tailwind, shadcn/ui, env config | Done |
+| **1** | Google OAuth + auth commands + minimal terminal | Done |
+| 2 | Command history, `clear`/`pwd`, parser expansion | Planned |
 | 3 | Google Drive VFS (`ls`, `cat`, `touch`, `rm`) | Planned |
 | 4 | Nano editor, upload, download | Planned |
 | 5 | `.doc` support + polish | Planned |
 | 6 | Hardening + production launch | Planned |
+
+Phase 1 pulled xterm.js forward from Phase 2 so auth commands can be typed naturally in a real terminal.
 
 See [docs/plan0.md](./docs/plan0.md) for the full roadmap.
 
@@ -22,8 +24,9 @@ See [docs/plan0.md](./docs/plan0.md) for the full roadmap.
 
 - **Framework:** Next.js (App Router) + React + TypeScript
 - **Styling:** Tailwind CSS v4 + [shadcn/ui](https://ui.shadcn.com)
-- **Terminal:** xterm.js *(Phase 2)*
-- **Auth:** Google Identity Services *(Phase 1)*
+- **Terminal:** [@xterm/xterm](https://xtermjs.org) + fit addon
+- **Auth:** Google Identity Services (`drive.file` + `userinfo.email` scopes)
+- **Client state:** Zustand (in-memory auth token)
 - **Storage:** Google Drive REST API v3 *(Phase 3)*
 
 ## Prerequisites
@@ -61,7 +64,7 @@ cp .env.local.example .env.local
 | `NEXT_PUBLIC_VFS_FOLDER_NAME` | No | Drive folder name (default: `WebTerminal`) |
 | `NEXT_PUBLIC_APP_NAME` | No | Display name (default: `Proxy-terminal`) |
 
-Phase 0 runs without a client ID — the app shell renders a welcome screen. Google OAuth is wired in Phase 1.
+See [docs/gcp-setup.md](./docs/gcp-setup.md) for step-by-step instructions on creating the OAuth client ID. Without a client ID the terminal still renders, but `login-drive` reports a configuration error.
 
 ### 4. Start the dev server
 
@@ -77,21 +80,38 @@ Open [http://localhost:3000](http://localhost:3000).
 npm run build   # Production build
 npm run start   # Serve production build
 npm run lint    # ESLint
+npm run test    # Unit tests (Vitest)
 ```
+
+## Terminal Commands (Phase 1)
+
+| Command | Description |
+|---------|-------------|
+| `help` | List available commands |
+| `login-drive` | Sign in with Google and connect Drive |
+| `logout` | Sign out and clear the in-memory session |
+| `whoami` | Show the connected Google account email |
+
+File commands (`ls`, `cat`, `nano`, `upload`, `download`) arrive in Phase 3.
 
 ## Project Structure
 
 ```
 proxy-terminal/
-├── app/                  # Next.js App Router pages and layout
+├── app/                  # Next.js App Router pages and layout (GIS script)
 ├── components/
+│   ├── terminal/         # TerminalWindow + welcome banner
 │   ├── ui/               # shadcn/ui primitives (Dialog, Button, Toaster)
-│   ├── app-shell.tsx     # Phase 0 placeholder shell
 │   └── providers.tsx     # Theme + toast providers
 ├── lib/
+│   ├── auth/             # GIS token client, Zustand store, userinfo
+│   ├── commands/         # Command router, registry, handlers
+│   ├── terminal/         # Input parser + output helpers
 │   └── env.ts            # Typed environment variable access
+├── types/                # Ambient GIS type declarations
 ├── docs/
 │   ├── plan0.md          # Implementation plan
+│   ├── gcp-setup.md      # Google Cloud OAuth setup guide
 │   └── Web_Terminal_Drive_Handover.md
 └── .env.local.example
 ```
@@ -111,6 +131,7 @@ Set the same environment variables in your hosting provider's dashboard before d
 ## Documentation
 
 - [Implementation Plan (plan0.md)](./docs/plan0.md)
+- [Google Cloud OAuth Setup](./docs/gcp-setup.md)
 - [Architecture Handover](./docs/Web_Terminal_Drive_Handover.md)
 
 ## License
