@@ -1,5 +1,5 @@
-import { AppShell } from "@/components/app-shell";
+import { TerminalWindow } from "@/components/terminal/TerminalWindow";
 
 export default function Home() {
-  return <AppShell />;
+  return <TerminalWindow />;
 }
