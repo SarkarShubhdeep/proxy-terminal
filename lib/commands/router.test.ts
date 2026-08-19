@@ -11,6 +11,8 @@ function makeIO(): CommandIO {
     writeError: vi.fn(),
     writeSuccess: vi.fn(),
     clearScreen: vi.fn(),
+    openEditor: vi.fn().mockResolvedValue(null),
+    pickFile: vi.fn().mockResolvedValue(null),
   };
 }
 
@@ -41,6 +43,9 @@ describe("dispatchCommand", () => {
     expect(output).toContain("cat");
     expect(output).toContain("touch");
     expect(output).toContain("rm");
+    expect(output).toContain("nano");
+    expect(output).toContain("upload");
+    expect(output).toContain("download");
   });
 
   it("clears the screen via clear", async () => {

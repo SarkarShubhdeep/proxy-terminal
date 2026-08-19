@@ -1,3 +1,4 @@
+import { triggerBrowserDownload } from "./browser-download";
 import { driveFetch } from "./client";
 import { getExtension } from "./filename";
 import { FOLDER_MIME_TYPE, GOOGLE_DOC_MIME_TYPE, mimeTypeForExtension } from "./mime";
@@ -107,6 +108,27 @@ export async function createFile(
     },
   );
   return (await response.json()) as DriveFile;
+}
+
+export async function uploadFile(
+  token: string,
+  folderId: string,
+  file: File,
+): Promise<DriveFile> {
+  const content = await file.text();
+  return createFile(token, folderId, file.name, content);
+}
+
+export async function downloadFile(
+  token: string,
+  fileId: string,
+  name: string,
+  mimeType?: string,
+): Promise<void> {
+  const content = await readFile(token, fileId, mimeType);
+  const extension = getExtension(name) ?? "txt";
+  const blob = new Blob([content], { type: mimeTypeForExtension(extension) });
+  triggerBrowserDownload(name, blob);
 }
 
 export async function writeFile(

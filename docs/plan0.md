@@ -50,8 +50,8 @@ The app uses the **`drive` OAuth scope** so it can list and manage all files ins
 ├─────────────────────────────────────────────────────────────┤
 │  xterm.js UI  →  Command Parser  →  Command Router          │
 │       ↑              ↓                    ↓                  │
-│  Nano Modal    Auth Context (GIS)    Drive VFS Service      │
-│  Upload/Download pickers              (drive-api.ts)         │
+│  In-terminal nano  Auth Context (GIS)  Drive VFS Service    │
+│  Upload picker                    (drive-api.ts)             │
 └──────────────────────────┬──────────────────────────────────┘
                            │ HTTPS (Bearer token)
                            ▼
@@ -106,7 +106,7 @@ The app uses the **`drive` OAuth scope** so it can list and manage all files ins
 | `cat` | `<file>` | Print file contents to terminal |
 | `touch` | `<file>` | Create empty `.txt`/`.md` file |
 | `rm` | `<file>` | Delete file (with confirmation for `.doc`) |
-| `nano` | `<file>` | Open shadcn Dialog + textarea/Monaco editor; save via Drive PATCH |
+| `nano` | `<file>` | In-terminal nano-style editor; ^O stages a write, ^X exits (prompts if modified) |
 | `upload` | — | Native file picker → multipart upload to folder |
 | `download` | `<file>` | Fetch media → trigger browser download |
 | `whoami` | — | Show connected Google account email (from token info) |
@@ -131,8 +131,6 @@ proxy-terminal/
 │   │   ├── TerminalWindow.tsx  # xterm mount, fit, theme
 │   │   ├── CommandInput.tsx    # Keystroke buffer (optional split)
 │   │   └── WelcomeBanner.ts    # ASCII art / help hint
-│   ├── editor/
-│   │   └── NanoEditor.tsx      # shadcn Dialog + editor
 │   └── ui/                     # shadcn primitives
 ├── lib/
 │   ├── commands/
@@ -148,7 +146,8 @@ proxy-terminal/
 │   │   └── token-store.ts      # Zustand store
 │   └── terminal/
 │       ├── parser.ts           # Split argv, validate
-│       └── output.ts           # writeln, error styling
+│       ├── output.ts           # writeln, error styling
+│       └── nano/               # In-terminal nano-style editor
 ├── hooks/
 │   ├── useTerminal.ts
 │   └── useDriveVfs.ts
@@ -214,10 +213,10 @@ Core functions in `drive-api.ts`:
 **Deliverable:** List and read/write `.txt` and `.md` files in Drive.
 
 ### Phase 4 — Editor & File Transfer (Week 3)
-- [ ] Build `NanoEditor` modal (textarea v1; Monaco optional v1.1)
-- [ ] Wire `nano <file>` create-or-edit flow
-- [ ] Implement `upload` (hidden `<input type="file">`, multipart POST)
-- [ ] Implement `download <file>` (Blob download)
+- [x] Build in-terminal nano-style editor (title bar, ^O/^X/^K/^U)
+- [x] Wire `nano <file>` create-or-edit flow
+- [x] Implement `upload` (hidden `<input type="file">`, multipart POST)
+- [x] Implement `download <file>` (Blob download)
 
 **Deliverable:** Full create/edit/upload/download loop for text files.
 

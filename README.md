@@ -11,12 +11,12 @@ Users interact through a familiar shell (`ls`, `cat`, `nano`, `upload`, `downloa
 | 0 | Next.js scaffold, Tailwind, shadcn/ui, env config | Done |
 | 1 | Google OAuth + auth commands + minimal terminal | Done |
 | 2 | Command history, `clear`/`pwd`, prompt state machine | Done |
-| **3** | Google Drive VFS (`ls`, `cat`, `touch`, `rm`) | Done |
-| 4 | Nano editor, upload, download | Planned |
+| 3 | Google Drive VFS (`ls`, `cat`, `touch`, `rm`) | Done |
+| **4** | Nano editor, upload, download | Done |
 | 5 | `.doc` support + polish | Planned |
 | 6 | Hardening + production launch | Planned |
 
-Phase 3 adds the Google Drive VFS: `login-drive` auto-mounts a `WebTerminal` folder and file commands read and write `.txt`/`.md` files directly from the browser.
+Phase 4 completes the text-file loop: `nano` opens an in-terminal editor, `upload` picks a local `.txt`/`.md` file, and `download` saves Drive files to the browser.
 
 See [docs/plan0.md](./docs/plan0.md) for the full roadmap.
 
@@ -97,8 +97,9 @@ npm run test    # Unit tests (Vitest)
 | `cat <file>` | Print the contents of a `.txt`/`.md` file |
 | `touch <file>` | Create a new empty `.txt`/`.md` file |
 | `rm <file>` | Delete a file |
-
-Editor and transfer commands (`nano`, `upload`, `download`) arrive in Phase 4.
+| `nano <file>` | Create or edit a file in an in-terminal nano-style editor |
+| `upload` | Pick a local `.txt`/`.md` file and upload it |
+| `download <file>` | Download a file to your computer |
 
 ## Project Structure
 
@@ -107,6 +108,7 @@ proxy-terminal/
 ├── app/                  # Next.js App Router pages and layout (GIS script)
 ├── components/
 │   ├── terminal/         # TerminalWindow + welcome banner
+│   ├── editor/           # Hidden file picker for upload
 │   ├── ui/               # shadcn/ui primitives (Dialog, Button, Toaster)
 │   └── providers.tsx     # Theme + toast providers
 ├── hooks/
@@ -116,7 +118,8 @@ proxy-terminal/
 │   ├── commands/         # Command router, registry, handlers, guards
 │   ├── drive/            # Drive REST client, VFS API, file index, mime
 │   ├── session/          # VFS mount state store
-│   ├── terminal/         # Parser, history, prompt, output helpers
+│   ├── ui/               # Overlay store for the upload file picker
+│   ├── terminal/         # Parser, history, prompt, in-terminal nano editor
 │   └── env.ts            # Typed environment variable access
 ├── types/                # Ambient GIS type declarations
 ├── docs/
