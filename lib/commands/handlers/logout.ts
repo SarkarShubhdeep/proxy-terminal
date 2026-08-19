@@ -1,5 +1,6 @@
 import { revokeToken } from "@/lib/auth/google-auth";
 import { useAuthStore } from "@/lib/auth/token-store";
+import { useSessionStore } from "@/lib/session/session-store";
 
 import type { CommandHandler } from "../types";
 
@@ -16,6 +17,7 @@ export const logoutCommand: CommandHandler = {
 
     revokeToken(store.token.accessToken);
     store.clearAuth();
+    useSessionStore.getState().unmountVfs();
     ctx.writeSuccess("Logged out.");
   },
 };
