@@ -37,6 +37,10 @@ describe("dispatchCommand", () => {
     expect(output).toContain("whoami");
     expect(output).toContain("clear");
     expect(output).toContain("pwd");
+    expect(output).toContain("ls");
+    expect(output).toContain("cat");
+    expect(output).toContain("touch");
+    expect(output).toContain("rm");
   });
 
   it("clears the screen via clear", async () => {
