@@ -12,7 +12,7 @@ Follow these steps once per environment (development and production share the sa
 
 ## 2. Enable the Google Drive API
 
-The Drive API is not used until Phase 3, but enabling it now avoids re-consent later.
+The Drive API is **required** from Phase 3 onward — `login-drive` mounts a folder and the file commands (`ls`, `cat`, `touch`, `rm`) call the Drive REST API. Enable it before signing in.
 
 1. Go to **APIs & Services → Library**.
 2. Search for **Google Drive API** and click **Enable**.

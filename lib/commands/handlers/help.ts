@@ -10,7 +10,7 @@ export const helpCommand: CommandHandler = {
     }
     ctx.writeLine("");
     ctx.writeLine(
-      "File commands (ls, cat, nano, upload, download) arrive in Phase 3.",
+      "Editor and transfer commands (nano, upload, download) arrive in Phase 4.",
     );
   },
 };

@@ -10,13 +10,13 @@ Users interact through a familiar shell (`ls`, `cat`, `nano`, `upload`, `downloa
 |-------|-------|--------|
 | 0 | Next.js scaffold, Tailwind, shadcn/ui, env config | Done |
 | 1 | Google OAuth + auth commands + minimal terminal | Done |
-| **2** | Command history, `clear`/`pwd`, prompt state machine | Done |
-| 3 | Google Drive VFS (`ls`, `cat`, `touch`, `rm`) | Planned |
+| 2 | Command history, `clear`/`pwd`, prompt state machine | Done |
+| **3** | Google Drive VFS (`ls`, `cat`, `touch`, `rm`) | Done |
 | 4 | Nano editor, upload, download | Planned |
 | 5 | `.doc` support + polish | Planned |
 | 6 | Hardening + production launch | Planned |
 
-Phase 1 pulled xterm.js forward from Phase 2. Phase 2 adds command history, `clear`/`pwd`, and a session store stub for Drive mounting in Phase 3.
+Phase 3 adds the Google Drive VFS: `login-drive` auto-mounts a `WebTerminal` folder and file commands read and write `.txt`/`.md` files directly from the browser.
 
 See [docs/plan0.md](./docs/plan0.md) for the full roadmap.
 
@@ -26,8 +26,8 @@ See [docs/plan0.md](./docs/plan0.md) for the full roadmap.
 - **Styling:** Tailwind CSS v4 + [shadcn/ui](https://ui.shadcn.com)
 - **Terminal:** [@xterm/xterm](https://xtermjs.org) + fit addon
 - **Auth:** Google Identity Services (`drive.file` + `userinfo.email` scopes)
-- **Client state:** Zustand (in-memory auth token)
-- **Storage:** Google Drive REST API v3 *(Phase 3)*
+- **Client state:** Zustand (in-memory auth token + session mount state)
+- **Storage:** Google Drive REST API v3
 
 ## Prerequisites
 
@@ -89,12 +89,16 @@ npm run test    # Unit tests (Vitest)
 |---------|-------------|
 | `help` | List available commands |
 | `clear` | Clear the terminal screen |
-| `login-drive` | Sign in with Google and connect Drive |
+| `login-drive` | Sign in with Google and mount the Drive folder |
 | `logout` | Sign out and clear the in-memory session |
-| `pwd` | Print the current virtual working directory |
 | `whoami` | Show the connected Google account email |
+| `pwd` | Print the current virtual working directory |
+| `ls` | List files in the mounted folder |
+| `cat <file>` | Print the contents of a `.txt`/`.md` file |
+| `touch <file>` | Create a new empty `.txt`/`.md` file |
+| `rm <file>` | Delete a file |
 
-File commands (`ls`, `cat`, `nano`, `upload`, `download`) arrive in Phase 3.
+Editor and transfer commands (`nano`, `upload`, `download`) arrive in Phase 4.
 
 ## Project Structure
 
@@ -109,8 +113,9 @@ proxy-terminal/
 │   └── useTerminal.ts    # xterm mount, input loop, history
 ├── lib/
 │   ├── auth/             # GIS token client, Zustand store, userinfo
-│   ├── commands/         # Command router, registry, handlers
-│   ├── session/          # VFS mount state stub (Phase 3)
+│   ├── commands/         # Command router, registry, handlers, guards
+│   ├── drive/            # Drive REST client, VFS API, file index, mime
+│   ├── session/          # VFS mount state store
 │   ├── terminal/         # Parser, history, prompt, output helpers
 │   └── env.ts            # Typed environment variable access
 ├── types/                # Ambient GIS type declarations

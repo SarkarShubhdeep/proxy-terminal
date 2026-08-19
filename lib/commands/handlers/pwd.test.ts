@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { useAuthStore } from "@/lib/auth/token-store";
+import { useSessionStore } from "@/lib/session/session-store";
 
 import { pwdCommand } from "./pwd";
 
@@ -17,21 +17,17 @@ function makeCtx() {
 
 describe("pwdCommand", () => {
   beforeEach(() => {
-    useAuthStore.getState().clearAuth();
+    useSessionStore.getState().unmountVfs();
   });
 
-  it("prints home for guests", () => {
+  it("prints home when the VFS is not mounted", () => {
     const ctx = makeCtx();
     pwdCommand.run(ctx);
     expect(ctx.writeLine).toHaveBeenCalledWith("~");
   });
 
-  it("prints the virtual VFS path when authenticated", () => {
-    useAuthStore.getState().setToken({
-      accessToken: "token",
-      expiresAt: Date.now() + 60_000,
-      scope: "drive.file",
-    });
+  it("prints the virtual VFS path when mounted", () => {
+    useSessionStore.getState().mountVfs("folder-123");
     const ctx = makeCtx();
     pwdCommand.run(ctx);
     expect(ctx.writeLine).toHaveBeenCalledWith("~/WebTerminal");

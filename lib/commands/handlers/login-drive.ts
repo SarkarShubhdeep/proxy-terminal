@@ -5,6 +5,10 @@ import {
 } from "@/lib/auth/google-auth";
 import { useAuthStore } from "@/lib/auth/token-store";
 import { fetchUserEmail } from "@/lib/auth/userinfo";
+import { initVfs, listFiles } from "@/lib/drive/drive-api";
+import { setFileIndex } from "@/lib/drive/file-index";
+import { getAppEnv } from "@/lib/env";
+import { useSessionStore } from "@/lib/session/session-store";
 
 import type { CommandContext, CommandHandler } from "../types";
 
@@ -31,6 +35,16 @@ async function authenticate(ctx: CommandContext): Promise<void> {
   const email = await fetchUserEmail(token.accessToken);
   store.setUser({ email });
   ctx.writeSuccess(`Authenticated as ${email}`);
+
+  const { vfsFolderName } = getAppEnv();
+  ctx.writeLine(`Mounting ~/${vfsFolderName}...`);
+
+  const folderId = await initVfs(token.accessToken, vfsFolderName);
+  useSessionStore.getState().mountVfs(folderId);
+
+  const files = await listFiles(token.accessToken, folderId);
+  setFileIndex(files);
+  ctx.writeSuccess(`Mounted ~/${vfsFolderName}`);
 }
 
 export const loginDriveCommand: CommandHandler = {
@@ -38,7 +52,7 @@ export const loginDriveCommand: CommandHandler = {
   description: "Sign in with Google and connect Drive",
   run: async (ctx) => {
     const store = useAuthStore.getState();
-    if (store.isAuthenticated()) {
+    if (store.isAuthenticated() && useSessionStore.getState().isVfsMounted) {
       ctx.writeLine("Already logged in. Run 'logout' to switch accounts.");
       return;
     }
@@ -49,6 +63,7 @@ export const loginDriveCommand: CommandHandler = {
     } catch (error) {
       useAuthStore.getState().clearAuth();
       useAuthStore.getState().setStatus("error");
+      useSessionStore.getState().unmountVfs();
       ctx.writeError(describeError(error));
     }
   },

@@ -207,9 +207,9 @@ Core functions in `drive-api.ts`:
 **Deliverable:** Interactive terminal shell without Drive yet.
 
 ### Phase 3 — Drive VFS (Week 2–3)
-- [ ] Implement `drive-api.ts` (initVfs, list, read, write, create, delete)
-- [ ] Auto-mount `WebTerminal` on successful login
-- [ ] Wire `ls`, `cat`, `touch`, `rm`
+- [x] Implement `drive-api.ts` (initVfs, list, read, write, create, delete)
+- [x] Auto-mount `WebTerminal` on successful login
+- [x] Wire `ls`, `cat`, `touch`, `rm`
 
 **Deliverable:** List and read/write `.txt` and `.md` files in Drive.
 
