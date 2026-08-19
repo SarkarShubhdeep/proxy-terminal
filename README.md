@@ -2,7 +2,7 @@
 
 A **web-based, secured terminal** for managing files in Google Drive — entirely from the browser, with no custom backend.
 
-Users interact through a familiar shell (`ls`, `cat`, `nano`, `upload`, `download`, …) to create, edit, download, and access `.txt`, `.md`, and `.doc` files in a dedicated `WebTerminal` Drive folder. Authentication uses Google Identity Services with the restricted `drive.file` OAuth scope, so tokens never leave the browser and the app can only access files it created.
+Users interact through a familiar shell (`ls`, `cat`, `nano`, `upload`, `download`, …) to create, edit, download, and access `.txt`, `.md`, and `.doc` files in a dedicated `WebTerminal` Drive folder. Authentication uses Google Identity Services; tokens never leave the browser. All file commands operate only inside the mounted `WebTerminal` folder.
 
 ## Status
 
@@ -25,7 +25,7 @@ See [docs/plan0.md](./docs/plan0.md) for the full roadmap.
 - **Framework:** Next.js (App Router) + React + TypeScript
 - **Styling:** Tailwind CSS v4 + [shadcn/ui](https://ui.shadcn.com)
 - **Terminal:** [@xterm/xterm](https://xtermjs.org) + fit addon
-- **Auth:** Google Identity Services (`drive.file` + `userinfo.email` scopes)
+- **Auth:** Google Identity Services (`drive` + `userinfo.email` scopes)
 - **Client state:** Zustand (in-memory auth token + session mount state)
 - **Storage:** Google Drive REST API v3
 
@@ -128,9 +128,11 @@ proxy-terminal/
 
 ## Security Model
 
-- **`drive.file` scope only** — the app cannot access files it did not create
+- **Folder sandbox** — file commands only run inside the mounted `WebTerminal` folder; the app never reads or writes elsewhere in Drive
 - **In-memory tokens** — never stored in `localStorage` or sent to a backend
 - **Zero-backend architecture** — all Drive API calls originate from the browser
+
+> **Note:** OAuth uses the `drive` scope so files you add to `WebTerminal` directly in Google Drive appear in `ls`. After pulling this change, revoke app access at [myaccount.google.com/permissions](https://myaccount.google.com/permissions) and run `login-drive` again to re-consent.
 
 ## Deployment
 

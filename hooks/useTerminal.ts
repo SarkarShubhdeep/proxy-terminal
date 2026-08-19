@@ -60,7 +60,7 @@ export function useTerminal(containerRef: RefObject<HTMLDivElement | null>) {
       const fitAddon = new FitAddon();
       term.loadAddon(fitAddon);
       term.open(container);
-      fitAddon.fit();
+      requestAnimationFrame(() => fitAddon.fit());
       term.focus();
       terminal = term;
 
@@ -132,6 +132,10 @@ export function useTerminal(containerRef: RefObject<HTMLDivElement | null>) {
       const handleResize = () => fitAddon.fit();
       window.addEventListener("resize", handleResize);
       cleanupFns.push(() => window.removeEventListener("resize", handleResize));
+
+      const resizeObserver = new ResizeObserver(() => fitAddon.fit());
+      resizeObserver.observe(container);
+      cleanupFns.push(() => resizeObserver.disconnect());
     };
 
     void boot();

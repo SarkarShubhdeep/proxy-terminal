@@ -72,6 +72,19 @@ describe("readFile", () => {
     const text = await readFile("token", "file-1");
     expect(text).toBe("hello world");
   });
+
+  it("exports Google Docs as plain text", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+      jsonResponse("# Title"),
+    );
+    const text = await readFile(
+      "token",
+      "file-1",
+      "application/vnd.google-apps.document",
+    );
+    expect(text).toBe("# Title");
+    expect(fetchMock.mock.calls[0][0]).toContain("/export?mimeType=text/plain");
+  });
 });
 
 describe("createFile", () => {

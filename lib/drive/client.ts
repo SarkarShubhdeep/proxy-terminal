@@ -24,6 +24,48 @@ function errorMessageForKind(kind: DriveErrorKind): string {
   }
 }
 
+interface GoogleApiErrorBody {
+  error?: {
+    message?: string;
+    errors?: Array<{ reason?: string }>;
+    details?: Array<{ reason?: string }>;
+  };
+}
+
+async function errorMessageForResponse(response: Response): Promise<string> {
+  const kind = errorKindForStatus(response.status);
+  const fallback = errorMessageForKind(kind);
+
+  try {
+    const body = (await response.json()) as GoogleApiErrorBody;
+    const apiMessage = body.error?.message;
+    const reason =
+      body.error?.details?.[0]?.reason ?? body.error?.errors?.[0]?.reason;
+
+    if (
+      reason === "ACCESS_TOKEN_SCOPE_INSUFFICIENT" ||
+      apiMessage?.toLowerCase().includes("insufficient authentication scopes")
+    ) {
+      return "Drive access not granted for this session. Revoke Proxy-terminal at https://myaccount.google.com/permissions and run login-drive again.";
+    }
+
+    if (
+      apiMessage?.includes("has not been used") ||
+      apiMessage?.includes("is disabled")
+    ) {
+      return "Google Drive API is disabled for this Cloud project. Enable it under APIs & Services → Library → Google Drive API.";
+    }
+
+    if (apiMessage) {
+      return apiMessage;
+    }
+  } catch {
+    // Ignore non-JSON error bodies.
+  }
+
+  return fallback;
+}
+
 export async function driveFetch(
   path: string,
   token: string,
@@ -46,7 +88,8 @@ export async function driveFetch(
 
   if (!response.ok) {
     const kind = errorKindForStatus(response.status);
-    throw new DriveApiError(kind, errorMessageForKind(kind));
+    const message = await errorMessageForResponse(response);
+    throw new DriveApiError(kind, message);
   }
 
   return response;

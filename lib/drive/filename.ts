@@ -1,4 +1,4 @@
-import { ALLOWED_TEXT_EXTENSIONS } from "./mime";
+import { ALLOWED_TEXT_EXTENSIONS, isReadableMimeType } from "./mime";
 
 export function getExtension(name: string): string | null {
   const dot = name.lastIndexOf(".");
@@ -9,6 +9,11 @@ export function getExtension(name: string): string | null {
 export function isTextFile(name: string): boolean {
   const extension = getExtension(name);
   return extension !== null && ALLOWED_TEXT_EXTENSIONS.includes(extension);
+}
+
+export function canReadFile(name: string, mimeType?: string): boolean {
+  if (mimeType && isReadableMimeType(mimeType)) return true;
+  return isTextFile(name);
 }
 
 export function validateFilename(name: string): string | null {

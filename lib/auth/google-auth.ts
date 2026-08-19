@@ -3,7 +3,7 @@ import { requireGoogleClientId } from "@/lib/env";
 import type { AuthToken } from "./types";
 
 const OAUTH_SCOPES = [
-  "https://www.googleapis.com/auth/drive.file",
+  "https://www.googleapis.com/auth/drive",
   "https://www.googleapis.com/auth/userinfo.email",
 ].join(" ");
 
@@ -33,7 +33,13 @@ function getOAuth2() {
   return oauth2;
 }
 
-export function requestAccessToken(): Promise<AuthToken> {
+export interface RequestAccessTokenOptions {
+  prompt?: "consent" | "select_account";
+}
+
+export function requestAccessToken(
+  options: RequestAccessTokenOptions = {},
+): Promise<AuthToken> {
   const clientId = requireGoogleClientId();
   const oauth2 = getOAuth2();
 
@@ -61,7 +67,9 @@ export function requestAccessToken(): Promise<AuthToken> {
       },
     });
 
-    client.requestAccessToken();
+    client.requestAccessToken(
+      options.prompt ? { prompt: options.prompt } : undefined,
+    );
   });
 }
 

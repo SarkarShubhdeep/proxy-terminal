@@ -19,7 +19,7 @@ Users interact through a familiar shell (`ls`, `cat`, `nano`, `upload`, `downloa
 | `.md`     | Markdown — read/write natively |
 | `.doc`    | Legacy Word binary — read via export; write via upload or Google Docs conversion (see Phase 2) |
 
-The app uses the restricted **`drive.file` OAuth scope**, so it can only see files and folders it created. Tokens stay in browser memory only.
+The app uses the **`drive` OAuth scope** so it can list and manage all files inside the mounted `WebTerminal` folder, including files added directly in Google Drive. Tokens stay in browser memory only; commands are sandboxed to that folder in application code.
 
 ---
 
@@ -75,7 +75,7 @@ The app uses the restricted **`drive.file` OAuth scope**, so it can only see fil
 
 ### Security Model
 
-1. **Scope isolation** — `https://www.googleapis.com/auth/drive.file` only
+1. **Folder sandbox** — all file commands operate only inside the mounted `WebTerminal` folder (`drive` scope; narrowed in app code)
 2. **Token storage** — in-memory React/Zustand; never `localStorage` / cookies
 3. **No backend proxy** — tokens never hit a developer-owned server
 4. **CSP headers** — restrict script sources; allow GIS + Drive API origins
@@ -251,7 +251,7 @@ Core functions in `drive-api.ts`:
    - `http://localhost:3000`
    - `https://<production-domain>`
 6. No client secret required (public SPA pattern with GIS)
-7. Scopes: `https://www.googleapis.com/auth/drive.file` only
+7. Scopes: `https://www.googleapis.com/auth/drive` + `userinfo.email`
 
 ---
 
@@ -284,7 +284,7 @@ Target: **80% unit coverage** on `lib/`; **100% coverage** on parser and drive-a
 | Risk | Impact | Mitigation |
 |------|--------|------------|
 | Token expires mid-session | User loses unsaved work | Refresh token proactively; `nano` warns on expiry |
-| `drive.file` scope limits | Cannot open pre-existing Drive files | Document that only app-created folder is accessible |
+| `drive` scope breadth | OAuth grants full Drive access | All commands sandboxed to `WebTerminal` folder only; document re-consent after scope change |
 | Large file upload limits | Drive API quotas | Client-side size check; clear error message |
 | XSS via malicious file content | Session compromise | Escape terminal output; no `dangerouslySetInnerHTML` |
 | `.doc` binary in terminal | Garbled output | Detect binary; suggest `download` instead of `cat` |

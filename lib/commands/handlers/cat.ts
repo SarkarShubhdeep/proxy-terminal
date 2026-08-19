@@ -1,21 +1,21 @@
 import { listFiles, readFile } from "@/lib/drive/drive-api";
-import { getIndexedFile, setFileIndex } from "@/lib/drive/file-index";
-import { isTextFile } from "@/lib/drive/filename";
-import { DriveApiError } from "@/lib/drive/types";
+import { canReadFile } from "@/lib/drive/filename";
+import { findIndexedFile, setFileIndex } from "@/lib/drive/file-index";
+import { DriveApiError, type DriveFile } from "@/lib/drive/types";
 
 import { requireMountedSession, type MountedSession } from "../guards";
 import type { CommandHandler } from "../types";
 
-async function resolveFileId(
+async function resolveFile(
   session: MountedSession,
   name: string,
-): Promise<string | undefined> {
-  const cached = getIndexedFile(name);
-  if (cached) return cached.id;
+): Promise<DriveFile | undefined> {
+  const cached = findIndexedFile(name);
+  if (cached) return cached;
 
   const files = await listFiles(session.token, session.folderId);
   setFileIndex(files);
-  return getIndexedFile(name)?.id;
+  return findIndexedFile(name);
 }
 
 export const catCommand: CommandHandler = {
@@ -31,19 +31,19 @@ export const catCommand: CommandHandler = {
     const session = requireMountedSession(ctx);
     if (!session) return;
 
-    if (!isTextFile(name)) {
-      ctx.writeError("Binary or unsupported file type.");
-      return;
-    }
-
     try {
-      const fileId = await resolveFileId(session, name);
-      if (!fileId) {
+      const file = await resolveFile(session, name);
+      if (!file) {
         ctx.writeError(`cat: ${name}: no such file`);
         return;
       }
 
-      const contents = await readFile(session.token, fileId);
+      if (!canReadFile(file.name, file.mimeType)) {
+        ctx.writeError("Binary or unsupported file type.");
+        return;
+      }
+
+      const contents = await readFile(session.token, file.id, file.mimeType);
       if (contents.length > 0) {
         ctx.writeLine(contents);
       }

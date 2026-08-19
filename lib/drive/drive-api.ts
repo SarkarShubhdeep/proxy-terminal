@@ -1,6 +1,6 @@
 import { driveFetch } from "./client";
 import { getExtension } from "./filename";
-import { FOLDER_MIME_TYPE, mimeTypeForExtension } from "./mime";
+import { FOLDER_MIME_TYPE, GOOGLE_DOC_MIME_TYPE, mimeTypeForExtension } from "./mime";
 import type { DriveFile } from "./types";
 
 function escapeQueryValue(value: string): string {
@@ -53,7 +53,19 @@ export async function listFiles(
   return data.files ?? [];
 }
 
-export async function readFile(token: string, fileId: string): Promise<string> {
+export async function readFile(
+  token: string,
+  fileId: string,
+  mimeType?: string,
+): Promise<string> {
+  if (mimeType === GOOGLE_DOC_MIME_TYPE) {
+    const response = await driveFetch(
+      `/drive/v3/files/${fileId}/export?mimeType=text/plain`,
+      token,
+    );
+    return response.text();
+  }
+
   const response = await driveFetch(
     `/drive/v3/files/${fileId}?alt=media`,
     token,

@@ -48,9 +48,13 @@ describe("catCommand", () => {
 
   it("rejects unsupported file types", async () => {
     authenticateAndMount();
-    const ctx = makeCtx(["image.png"]);
+    setFileIndex([
+      { id: "1", name: "photo.png", mimeType: "image/png" },
+    ]);
+    const ctx = makeCtx(["photo.png"]);
     await catCommand.run(ctx);
     expect(ctx.writeError).toHaveBeenCalledWith("Binary or unsupported file type.");
+    expect(readFile).not.toHaveBeenCalled();
   });
 
   it("prints file contents from the cache", async () => {
@@ -59,8 +63,28 @@ describe("catCommand", () => {
     readFile.mockResolvedValueOnce("hello");
     const ctx = makeCtx(["notes.md"]);
     await catCommand.run(ctx);
-    expect(readFile).toHaveBeenCalledWith("token", "1");
+    expect(readFile).toHaveBeenCalledWith("token", "1", "text/markdown");
     expect(ctx.writeLine).toHaveBeenCalledWith("hello");
+  });
+
+  it("reads converted Google Docs uploaded from Drive", async () => {
+    authenticateAndMount();
+    setFileIndex([
+      {
+        id: "1",
+        name: "README",
+        mimeType: "application/vnd.google-apps.document",
+      },
+    ]);
+    readFile.mockResolvedValueOnce("# Proxy-terminal");
+    const ctx = makeCtx(["README.md"]);
+    await catCommand.run(ctx);
+    expect(readFile).toHaveBeenCalledWith(
+      "token",
+      "1",
+      "application/vnd.google-apps.document",
+    );
+    expect(ctx.writeLine).toHaveBeenCalledWith("# Proxy-terminal");
   });
 
   it("errors when the file does not exist", async () => {

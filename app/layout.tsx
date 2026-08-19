@@ -29,10 +29,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} dark h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} dark h-dvh overflow-hidden antialiased`}
       suppressHydrationWarning
     >
-      <body className="flex min-h-full flex-col">
+      <body className="h-full overflow-hidden">
         <Providers>{children}</Providers>
         <Script
           src="https://accounts.google.com/gsi/client"

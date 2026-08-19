@@ -53,16 +53,28 @@ NEXT_PUBLIC_GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
 
 Restart `npm run dev` after changing env values so Next.js picks them up.
 
+## Troubleshooting `login-drive`
+
+If sign-in succeeds but mounting fails with **Permission denied**:
+
+1. **Enable Google Drive API** — APIs & Services → Library → **Google Drive API** → **Enable** (for the same project as your OAuth client ID).
+2. **Revoke stale access** — open [Google Account permissions](https://myaccount.google.com/permissions), remove **Proxy-terminal**, then run `login-drive` again so Google re-prompts for Drive access.
+3. **Confirm test user** — while the app is in Testing mode, your Google account must be listed under OAuth consent screen → **Test users**.
+
+After pulling the latest code, `login-drive` also retries once with fresh consent when Drive returns a permission error.
+
+If you previously signed in with the old `drive.file` scope, revoke Proxy-terminal at [Google Account permissions](https://myaccount.google.com/permissions) and run `login-drive` again so Google prompts for the updated `drive` scope.
+
 ## OAuth scopes requested at login
 
 The app requests these scopes when the user runs `login-drive`:
 
 | Scope | Purpose |
 | ----- | ------- |
-| `https://www.googleapis.com/auth/drive.file` | Access only the files and folders this app creates (used from Phase 3). Requested now so users do not have to re-consent later. |
+| `https://www.googleapis.com/auth/drive` | Read and write files inside the mounted `WebTerminal` folder (required so `ls` shows files you add directly in Google Drive). |
 | `https://www.googleapis.com/auth/userinfo.email` | Read the signed-in user's email address for the `whoami` command. |
 
-The `drive.file` scope is intentionally restrictive: the application is physically incapable of seeing Drive files it did not create.
+The app sandboxes all file operations to the `WebTerminal` folder in code — commands never list or modify files outside that folder, even though OAuth grants broader Drive access.
 
 ## Security notes
 

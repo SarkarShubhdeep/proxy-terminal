@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import {
   addIndexedFile,
   clearFileIndex,
+  findIndexedFile,
   getIndexedFile,
   removeIndexedFile,
   setFileIndex,
@@ -42,5 +43,21 @@ describe("file-index", () => {
     setFileIndex([file("a.txt", "1")]);
     clearFileIndex();
     expect(getIndexedFile("a.txt")).toBeUndefined();
+  });
+
+  it("finds files case-insensitively", () => {
+    setFileIndex([file("README.md", "1")]);
+    expect(findIndexedFile("readme.md")?.id).toBe("1");
+  });
+
+  it("matches a basename when Drive drops the extension", () => {
+    setFileIndex([
+      {
+        id: "1",
+        name: "README",
+        mimeType: "application/vnd.google-apps.document",
+      },
+    ]);
+    expect(findIndexedFile("README.md")?.id).toBe("1");
   });
 });
