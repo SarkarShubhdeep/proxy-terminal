@@ -198,10 +198,11 @@ Core functions in `drive-api.ts`:
 **Deliverable:** User can authenticate; token held in memory; `whoami` works.
 
 ### Phase 2 — Terminal Core (Week 2)
-- [ ] Integrate `xterm.js` + fit addon + dark theme
-- [ ] Build keystroke buffer, prompt rendering, command history (↑/↓)
-- [ ] Implement command parser and router
-- [ ] Add `help`, `clear`, `pwd` stubs
+- [x] Integrate `xterm.js` + fit addon + dark theme *(completed in Phase 1)*
+- [x] Build keystroke buffer, prompt rendering, command history (↑/↓)
+- [x] Implement command parser and router *(completed in Phase 1)*
+- [x] Add `help`, `clear`, `pwd` commands
+- [x] Prompt state machine (guest / authenticated / mounted) + session store stub
 
 **Deliverable:** Interactive terminal shell without Drive yet.
 

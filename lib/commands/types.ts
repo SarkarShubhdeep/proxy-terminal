@@ -7,6 +7,7 @@ export interface CommandIO {
   writeLine: (text: string) => void;
   writeError: (text: string) => void;
   writeSuccess: (text: string) => void;
+  clearScreen: () => void;
 }
 
 export interface CommandContext extends CommandIO {

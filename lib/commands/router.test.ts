@@ -5,13 +5,13 @@ import { useAuthStore } from "@/lib/auth/token-store";
 import { dispatchCommand } from "./router";
 import type { CommandIO } from "./types";
 
-function makeIO() {
-  const io: CommandIO = {
+function makeIO(): CommandIO {
+  return {
     writeLine: vi.fn(),
     writeError: vi.fn(),
     writeSuccess: vi.fn(),
+    clearScreen: vi.fn(),
   };
-  return io;
 }
 
 describe("dispatchCommand", () => {
@@ -35,6 +35,14 @@ describe("dispatchCommand", () => {
       .join("\n");
     expect(output).toContain("login-drive");
     expect(output).toContain("whoami");
+    expect(output).toContain("clear");
+    expect(output).toContain("pwd");
+  });
+
+  it("clears the screen via clear", async () => {
+    const io = makeIO();
+    await dispatchCommand(["clear"], io);
+    expect(io.clearScreen).toHaveBeenCalledTimes(1);
   });
 
   it("reports guest identity when not authenticated", async () => {

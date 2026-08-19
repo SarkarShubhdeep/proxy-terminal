@@ -9,14 +9,14 @@ Users interact through a familiar shell (`ls`, `cat`, `nano`, `upload`, `downloa
 | Phase | Scope | Status |
 |-------|-------|--------|
 | 0 | Next.js scaffold, Tailwind, shadcn/ui, env config | Done |
-| **1** | Google OAuth + auth commands + minimal terminal | Done |
-| 2 | Command history, `clear`/`pwd`, parser expansion | Planned |
+| 1 | Google OAuth + auth commands + minimal terminal | Done |
+| **2** | Command history, `clear`/`pwd`, prompt state machine | Done |
 | 3 | Google Drive VFS (`ls`, `cat`, `touch`, `rm`) | Planned |
 | 4 | Nano editor, upload, download | Planned |
 | 5 | `.doc` support + polish | Planned |
 | 6 | Hardening + production launch | Planned |
 
-Phase 1 pulled xterm.js forward from Phase 2 so auth commands can be typed naturally in a real terminal.
+Phase 1 pulled xterm.js forward from Phase 2. Phase 2 adds command history, `clear`/`pwd`, and a session store stub for Drive mounting in Phase 3.
 
 See [docs/plan0.md](./docs/plan0.md) for the full roadmap.
 
@@ -83,13 +83,15 @@ npm run lint    # ESLint
 npm run test    # Unit tests (Vitest)
 ```
 
-## Terminal Commands (Phase 1)
+## Terminal Commands
 
 | Command | Description |
 |---------|-------------|
 | `help` | List available commands |
+| `clear` | Clear the terminal screen |
 | `login-drive` | Sign in with Google and connect Drive |
 | `logout` | Sign out and clear the in-memory session |
+| `pwd` | Print the current virtual working directory |
 | `whoami` | Show the connected Google account email |
 
 File commands (`ls`, `cat`, `nano`, `upload`, `download`) arrive in Phase 3.
@@ -103,10 +105,13 @@ proxy-terminal/
 │   ├── terminal/         # TerminalWindow + welcome banner
 │   ├── ui/               # shadcn/ui primitives (Dialog, Button, Toaster)
 │   └── providers.tsx     # Theme + toast providers
+├── hooks/
+│   └── useTerminal.ts    # xterm mount, input loop, history
 ├── lib/
 │   ├── auth/             # GIS token client, Zustand store, userinfo
 │   ├── commands/         # Command router, registry, handlers
-│   ├── terminal/         # Input parser + output helpers
+│   ├── session/          # VFS mount state stub (Phase 3)
+│   ├── terminal/         # Parser, history, prompt, output helpers
 │   └── env.ts            # Typed environment variable access
 ├── types/                # Ambient GIS type declarations
 ├── docs/
