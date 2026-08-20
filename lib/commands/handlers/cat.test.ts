@@ -17,6 +17,8 @@ function makeCtx(args: string[] = []) {
     writeError: vi.fn(),
     writeSuccess: vi.fn(),
     clearScreen: vi.fn(),
+    openEditor: vi.fn(),
+    pickFile: vi.fn(),
     args,
     commands: [],
   };

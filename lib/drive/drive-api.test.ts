@@ -1,11 +1,20 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+const triggerBrowserDownload = vi.hoisted(() => vi.fn());
+
+vi.mock("./browser-download", () => ({
+  triggerBrowserDownload,
+}));
+
 import {
   createFile,
   deleteFile,
+  downloadFile,
   initVfs,
   listFiles,
   readFile,
+  uploadFile,
+  writeFile,
 } from "./drive-api";
 import { DriveApiError } from "./types";
 
@@ -19,6 +28,7 @@ function jsonResponse(body: unknown, ok = true, status = 200): Response {
 }
 
 afterEach(() => {
+  triggerBrowserDownload.mockReset();
   vi.restoreAllMocks();
 });
 
@@ -100,6 +110,45 @@ describe("createFile", () => {
     expect(init?.method).toBe("POST");
     expect(String(init?.headers && (init.headers as Record<string, string>)["Content-Type"])).toContain(
       "multipart/related",
+    );
+  });
+});
+
+describe("writeFile", () => {
+  it("patches media content", async () => {
+    const fetchMock = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(jsonResponse({}));
+    await writeFile("token", "file-1", "updated");
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(String(url)).toContain("/upload/drive/v3/files/file-1");
+    expect(init?.method).toBe("PATCH");
+    expect(init?.body).toBe("updated");
+  });
+});
+
+describe("uploadFile", () => {
+  it("reads the File and posts multipart content", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+      jsonResponse({ id: "file-1", name: "notes.md", mimeType: "text/markdown" }),
+    );
+    const file = new File(["hello"], "notes.md", { type: "text/markdown" });
+    const created = await uploadFile("token", "folder-1", file);
+    expect(created.id).toBe("file-1");
+    const [, init] = fetchMock.mock.calls[0];
+    expect(init?.method).toBe("POST");
+    expect(String(init?.body)).toContain("hello");
+    expect(String(init?.body)).toContain("notes.md");
+  });
+});
+
+describe("downloadFile", () => {
+  it("fetches media and triggers a browser download", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(jsonResponse("hello"));
+    await downloadFile("token", "file-1", "notes.md", "text/markdown");
+    expect(triggerBrowserDownload).toHaveBeenCalledWith(
+      "notes.md",
+      expect.any(Blob),
     );
   });
 });

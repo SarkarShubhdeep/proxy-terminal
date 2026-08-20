@@ -5,7 +5,10 @@ import { dispatchCommand } from "@/lib/commands/router";
 import { useAuthStore } from "@/lib/auth/token-store";
 import { getAppEnv } from "@/lib/env";
 import { useSessionStore } from "@/lib/session/session-store";
+import { useOverlayStore } from "@/lib/ui/overlay-store";
 import { createCommandHistory } from "@/lib/terminal/history";
+import { runNanoEditor } from "@/lib/terminal/nano/run-nano";
+import type { EditorRequest } from "@/lib/terminal/nano/types";
 import { parseCommand } from "@/lib/terminal/parser";
 import {
   getCurrentPrompt,
@@ -74,6 +77,9 @@ export function useTerminal(containerRef: RefObject<HTMLDivElement | null>) {
         writeError: (text: string) => writeError(term, text),
         writeSuccess: (text: string) => writeSuccess(term, text),
         clearScreen: () => term.clear(),
+        openEditor: (request: EditorRequest) => runNanoEditor(term, request),
+        pickFile: (accept?: string) =>
+          useOverlayStore.getState().pickFile(accept),
       };
 
       const submit = async () => {
@@ -86,6 +92,7 @@ export function useTerminal(containerRef: RefObject<HTMLDivElement | null>) {
           running = true;
           await dispatchCommand(parseCommand(input), io);
           running = false;
+          term.focus();
         }
 
         history.resetDraft();
